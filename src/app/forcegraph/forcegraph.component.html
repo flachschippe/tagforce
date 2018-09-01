@@ -1,0 +1,14 @@
+<svg width="960" height="600">
+  <g class="links"></g>
+  <g class="nodes"></g>
+</svg>
+
+<div class="ui input">
+  <input type="text" placeholder="Search..." [(ngModel)]="query">
+</div>
+<div class="ui input">
+  <input type="text" placeholder="Iterations..." [(ngModel)]="iterations">
+</div>
+<button (click)=drawGraph() class="ui button">
+  Go
+</button>
