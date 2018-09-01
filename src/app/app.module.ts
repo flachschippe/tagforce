@@ -4,10 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
 import { AppComponent } from './app.component';
+import { ForcegraphComponent } from './forcegraph/forcegraph.component'
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    ForcegraphComponent
   ],
   imports: [
     BrowserModule,
