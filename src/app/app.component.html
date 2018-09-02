@@ -1,2 +1,12 @@
-<app-forcegraph>
+<app-forcegraph [width]=800 [height]=600 [graph]=graph>
 </app-forcegraph>
+
+<div class="ui input">
+  <input type="text" placeholder="Search..." [(ngModel)]="query">
+</div>
+<div class="ui input">
+  <input type="text" placeholder="Iterations..." [(ngModel)]="iterations">
+</div>
+<button (click)=fetchData() class="ui button">
+  Go
+</button>

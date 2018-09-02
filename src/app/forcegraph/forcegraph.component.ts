@@ -9,90 +9,100 @@ declare var d3
   encapsulation: ViewEncapsulation.None
 })
 export class ForcegraphComponent implements OnInit, OnChanges {
-  constructor(private el:ElementRef, private http: Http) {
-    this.query = ""
-    this.iterations = "0"
-   }
 
+  @Input()
+  graph: Object;
+  @Input()
+  width: number;
+  @Input()
+  height: number;
 
-   query:string
-   iterations:string
+  constructor(private el: ElementRef, private http: Http) {
+    this.graph = {};
+    this.width = 200;
+    this.height = 200;
+  }
 
   ngOnInit() {
 
   }
 
-  ngOnChanges(){
-    if(this.query != "" && parseInt(this.iterations) > 0) {
-      this.drawGraph()
+  ngOnChanges() {
+    if (this.graph['nodes'] !== undefined && this.graph['nodes'].length > 0) {
+      this.drawGraph();
     }
   }
 
   drawGraph() {
 
-    let svg = d3.select(this.el.nativeElement).select("svg"),
-      width = +svg.attr("width"),
-      height = +svg.attr("height");
+    let svg = d3.select(this.el.nativeElement).select('svg'),
+      width = +svg.attr('width'),
+      height = +svg.attr('height');
 
     let color = d3.scaleOrdinal(d3.schemeCategory10);
 
     var simulation = d3.forceSimulation()
-      .force("link", d3.forceLink().id(function (d) { return d.id; }))
-      .force("charge", d3.forceManyBody())
-      .force("center", d3.forceCenter(width / 2, height / 2));
+      .force('link', d3.forceLink().id(function (d) { return d.id; }))
+      .force('charge', d3.forceManyBody())
+      .force('center', d3.forceCenter(width / 2, height / 2));
 
 
-    let myParams = new URLSearchParams();
-    myParams.append('query', this.query);
-    myParams.append('iterations', this.iterations);
-    let options = new RequestOptions({ search: myParams });
-    return this.http.get("http://localhost:5000/", options).toPromise()
-    .then((response)=>{
-      let graph = response.json()
-      var link = svg.select("g.links")
-        .selectAll("line")
-        .data(graph.links)
-        .enter().append("line")
-        .attr("stroke-width", function (d) { return Math.sqrt(d.value); });
 
-      var node = svg.select("g.nodes")
-        .selectAll("circle")
-        .data(graph.nodes)
-        .enter().append("circle")
-        .attr("fill", function (d) {
-          return color(d.group);
-        }).attr("r", 5)
-        .call(d3.drag()
-          .on("start", dragstarted)
-          .on("drag", dragged)
-          .on("end", dragended));
-      node.exit().remove()
+    var link = svg.select('g.links')
+      .selectAll('line')
+      .data(this.graph['links'])
+      .enter().append('line')
+      .attr('stroke-width', function (d) { return Math.sqrt(d.value); });
+    link.exit().remove()
 
-      node.append("title")
-        .text(function (d) { return d.id; });
+    var node = svg.select('g.nodes')
+      .selectAll('circle')
+      .data(this.graph['nodes'])
+      .enter().append('circle')
+      .attr('fill', function (d) {
+        return color(d.group);
+      }).attr('r', 5)
+      .call(d3.drag()
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended));
+    node.exit().remove();
 
-      simulation
-        .nodes(graph.nodes)
-        .on("tick", ticked);
+    var label = svg.select('g.labels')
+    .selectAll('text')
+    .data(this.graph['nodes'])
+    .enter().append('text')
+    .text(function (d) { return d.id; });
+    node.exit().remove();
 
-      simulation.force("link")
-        .links(graph.links);
+    node.append('title')
+      .text(function (d) { return d.id; });
 
-      simulation.alphaTarget(0.3).restart()
-      function ticked() {
-        link
-          .attr("x1", function (d) {
-            return d.source.x;
-          })
-          .attr("y1", function (d) { return d.source.y; })
-          .attr("x2", function (d) { return d.target.x; })
-          .attr("y2", function (d) { return d.target.y; });
+    simulation
+      .nodes(this.graph['nodes'])
+      .on('tick', ticked);
 
-        node
-          .attr("cx", function (d) { return d.x; })
-          .attr("cy", function (d) { return d.y; });
-      }
-    });
+    simulation.force('link')
+      .links(this.graph['links']);
+
+    simulation.alphaTarget(0.3).restart()
+    function ticked() {
+      link
+        .attr('x1', function (d) {
+          return d.source.x;
+        })
+        .attr('y1', function (d) { return d.source.y; })
+        .attr('x2', function (d) { return d.target.x; })
+        .attr('y2', function (d) { return d.target.y; });
+
+      node
+        .attr('cx', function (d) { return d.x; })
+        .attr('cy', function (d) { return d.y; });
+      label
+        .attr('x', function (d) { return d.x; })
+        .attr('y', function (d) { return d.y; });
+    }
+
 
     function dragstarted(d) {
       if (!d3.event.active) simulation.alphaTarget(0.3).restart();
