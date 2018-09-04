@@ -40,3 +40,4 @@ Thumbs.db
 package-lock.json
 .angulardoc.json
 */__pycache__/
+semantic/
