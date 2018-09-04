@@ -37,8 +37,17 @@ export class ForcegraphComponent implements OnInit, OnChanges {
 
     let svg = d3.select(this.el.nativeElement).select('svg'),
       width = +svg.attr('width'),
-      height = +svg.attr('height');
+      height = +svg.attr('height')
+      ;
 
+    function zoomed() {
+      svg.attr("transform", d3.event.transform);
+    }
+    var zoom = d3.zoom()
+    .scaleExtent([1, 10])
+    .on("zoom", zoomed);
+
+    svg.call(zoom);
     let color = d3.scaleOrdinal(d3.schemeCategory10);
 
     var simulation = d3.forceSimulation()
@@ -61,18 +70,26 @@ export class ForcegraphComponent implements OnInit, OnChanges {
       .enter().append('circle')
       .attr('fill', function (d) {
         return color(d.group);
-      }).attr('r', 5)
+      }).attr('r', valueToSize)
       .call(d3.drag()
         .on('start', dragstarted)
         .on('drag', dragged)
         .on('end', dragended));
+
     node.exit().remove();
 
     var label = svg.select('g.labels')
     .selectAll('text')
     .data(this.graph['nodes'])
     .enter().append('text')
-    .text(function (d) { return d.id; });
+    .text(function (d) { return d.id; })
+    .attr('style', (d) => {return 'font: italic ' +  valueToSize(d).toString() + 'px sans-serif';})
+    .on('mouseover', hoveron)
+    .on('mouseout', hoveroff)
+    .call(d3.drag()
+    .on('start', dragstarted)
+    .on('drag', dragged)
+    .on('end', dragended));
     node.exit().remove();
 
     node.append('title')
@@ -103,6 +120,9 @@ export class ForcegraphComponent implements OnInit, OnChanges {
         .attr('y', function (d) { return d.y; });
     }
 
+    function valueToSize (d) {
+      return 10 / (1 + Math.pow(Math.E, -1 * (d.value - 1)));
+    }
 
     function dragstarted(d) {
       if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -119,6 +139,15 @@ export class ForcegraphComponent implements OnInit, OnChanges {
       if (!d3.event.active) simulation.alphaTarget(0);
       d.fx = null;
       d.fy = null;
+    }
+
+
+    function hoveron(d) {
+      d3.select(this).attr('style', () => {return 'font: italic ' +  valueToSize(10).toString() + 'px sans-serif';});
+    }
+
+    function hoveroff(d) {
+      d3.select(this).attr('style', (d) => {return 'font: italic ' +  valueToSize(d).toString() + 'px sans-serif';});
     }
   }
 
