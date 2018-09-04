@@ -52,7 +52,7 @@ def do_harvest(query, iterations):
 
     # map for collecting nodes
     nodes = {}
-    while(iterations > 0):
+    while(iterations > len(nodes)):
         page = requests.get(query_string)
         tree = html.fromstring(page.content)
 
@@ -73,11 +73,8 @@ def do_harvest(query, iterations):
 
                 for s in book_data['Schlagwörter']:
                     node = None
-                    if s not in nodes:
-                        node = graph.add_node (s)
-                        nodes[s] = node
-                    else:
-                        node = nodes[s]
+                    node = graph.add_node (s)
+                    nodes[s] = node
 
                 s1 = book_data['Schlagwörter'][0]
                 for s in book_data['Schlagwörter']:

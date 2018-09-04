@@ -26,7 +26,14 @@ class JSONParser:
         jsonDict['nodes'] = []
         # Add nodes
         for n in graph.nodes():
-            jsonDict['nodes'].append({'id':n['label'], 'group':'1'})
+            dupcliateFound = False
+            for node in jsonDict['nodes']:
+                if(node['id'] == n['label']):
+                    node['value'] += 1
+                    dupcliateFound = True
+                    break
+            if(False == dupcliateFound):
+              jsonDict['nodes'].append({'id':n['label'], 'group':'1', 'value': 1})
 
         jsonDict['links'] = []
 
