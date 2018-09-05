@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+  production: true,
+  harvest_service_url: "http://mediaserver/graph"
 };

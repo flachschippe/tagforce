@@ -10,8 +10,8 @@ from pygraphml import Graph
 import JSONParser
 from flask import Flask
 from flask import request, make_response
-app = Flask(__name__)
-
+app = Flask(__name__, static_url_path='')
+app._static_folder = "/home/tobias/tagforce/dist/"
 
 def cleanhtml(raw_html):
   cleanr = re.compile('<.*?>')
@@ -68,8 +68,6 @@ def do_harvest(query, iterations):
             get_data_from_book_info_link(book_data, book_info_response, "Schlagwörter")
 
             if(len(book_data['Schlagwörter']) > 0):
-                for v in book_data.values():
-                    print(v)
 
                 for s in book_data['Schlagwörter']:
                     node = None
@@ -91,10 +89,21 @@ def do_harvest(query, iterations):
 
 
 
-@app.route("/")
+
+@app.route("/graph")
 def harvest():
     query = request.args.get('query', '')
     iterations = int(request.args.get('iterations', ''))
     resp = make_response(do_harvest(query, iterations), 200)
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
+
+@app.route('/')
+def root():
+    return app.send_static_file('index.html')
+
+if __name__ == '__main__':
+      app.run(host='0.0.0.0', port=80)
+
+
+
